@@ -9,6 +9,12 @@
 </head>
 <body>
 <h3>사원목록</h3>
+<div class="row mb-2 ">
+    <div class="col-auto">
+        <a class="btn btn-primary" href="register">신규사원등록</a>
+    </div>
+</div>
+
 <table class="table tb-list">
 <colgroup>
 
@@ -32,10 +38,10 @@
 <c:forEach items="${list }" var="vo">
 	<tr>
 		<td>${vo.employee_id}</td>
-		<td>${vo.name}</td>
+		<td><a class="text-link" href="info?id=${vo.employee_id}">${vo.name}</a></td>
 		<%-- <td>${vo.last_name} ${vo.first_name } </td> --%>
-		<td>${vo.department_id}</td>
-		<td>${vo.job_id}</td>
+		<td>${vo.department_name}</td>
+		<td>${vo.job_title}</td>
 		<td>${vo.hire_date}</td>
 	</tr>
 		

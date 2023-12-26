@@ -10,7 +10,7 @@
 <body>
 <h3 class="mb-4">고객목록</h3>
 
-<form mothod="post" action="list.cu">
+<form method="post" action="list.cu">
 <div class="row mb-2 justify-content-between">
      <div class="col-auto">
        <div class="input-group">
