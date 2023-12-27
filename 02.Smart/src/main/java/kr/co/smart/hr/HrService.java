@@ -23,6 +23,10 @@ public class HrService {
 	public List<EmployeeVO> employee_list() {
 		return sql.selectList("hr.list");
 	}
+	  public List<EmployeeVO> employee_list(int dipartment_id) {
+		 return sql.selectList("hr.list",dipartment_id);
+	}
+	
 	//사원정보조회
 	
 	public EmployeeVO employee_info(int id) {
@@ -35,6 +39,11 @@ public class HrService {
 	//사원정보삭제
 	public int employee_delete(int id) {
 		return sql.selectOne("hr.delete",id);
+	}
+	
+	//사원들이 속해있는 부서목록 조회
+	public List<DepartmentVO> employee_department_list(){
+		return sql.selectList("hr.employeeDepartmentList");
 	}
     //우리회사 전체 부서목록 조회
 	public List<DepartmentVO> hr_department_list() {

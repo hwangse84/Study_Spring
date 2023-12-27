@@ -41,4 +41,6 @@
 	<constructor-arg name="sqlSessionFactory"  ref="factory_hr"/>
 </bean>
 
+<bean class="org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder"/>
+<!-- <bean class="kr.co.smart.common.CommonUtility"/> -->
 </beans>
