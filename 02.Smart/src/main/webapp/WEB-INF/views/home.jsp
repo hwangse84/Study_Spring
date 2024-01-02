@@ -6,8 +6,7 @@
 	<title>Home</title>
 </head>
 <body>
-<h1>
 <h3>스마트 IoT융합 플랫폼 과정</h3>
-<img src="img/hanul.png" style="width=100%">
+<img src="img/hanul.png" style="width:100%">
 </body>
 </html>
