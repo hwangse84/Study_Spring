@@ -45,7 +45,7 @@ public class HomeController {
 		String user_id="hanul201", user_pw="852931fd-935c-42ff-b36c-de296f5ce703";
 		MemberVO vo= member.member_info(user_id);
 		if(pwEncoder.matches(user_pw,vo.getUser_pw())) {
-			session.setAttribute("loginInfo", vo);
+	//		session.setAttribute("loginInfo", vo);
 		}
 		session.removeAttribute("category");
 		//session.removeAttribute(category,"");

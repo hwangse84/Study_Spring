@@ -36,7 +36,7 @@
 	</beans:bean>
 	
 	
-	
+<!-- 	<context:property-placeholder location="classpath:info.properties"/> -->
 	<context:component-scan base-package="kr.co.smart" />
 	
 	

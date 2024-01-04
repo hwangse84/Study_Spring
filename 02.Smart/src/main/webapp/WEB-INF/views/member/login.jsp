@@ -5,6 +5,10 @@
 <head>
 <meta charset="UTF-8">
 <title>Insert title here</title>
+<style>
+#naver { background: url("<c:url value='/img/naver.png'/>") center/contain no-repeat #03c75a; }/* 가운데 반복하지않게!빈곳은 색상채움 */
+#kakao { background: url(""); }
+</style>
 </head>
 <body>
 
@@ -15,7 +19,7 @@
 	            <h3 class="text-center font-weight-light my-4">
 					<a href="<c:url value='/'/>"><img src="<c:url value='/img/hanul.logo.png'/>"></a>	
 				</h3></div>
-            <div class="card-body" > 
+            <div class="card-body">
                 <form method="post" action="smartLogin">
                     <div class="form-floating mb-3">
                         <input class="form-control" name="user_id" type="text" placeholder="아이디">
@@ -32,17 +36,26 @@
                         <label class="form-check-label" for="inputRememberPassword">Remember Password</label>
                     </div>
                     -->
+                </form>
                     <hr>
+                    <div class="d-flex gap-3">
+                    	<input type="button" class="form-control p-3" id="naver">
+                    	<input type="button" class="form-control p-3" id="kakao">
+                    </div>
                     <div class="d-flex align-items-center justify-content-between mt-4 mb-0">
                         <a class="small" href="">회원가입</a>
                         <a class="small" href="findPassword">비밀번호찾기</a>
                     </div>
-                </form>
             </div>
-            
         </div>
     </div>
 </div>
+
+<script>
+$("#naver,#kakao").click(function(){
+	location= $(this).attr("id")+"Login";
+})
+</script>
 
 </body>
 </html>
