@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="notice">
+<!-- 공지글 삭제 -->
+<delete id="delete">
+delete from notice where id=#{id}
+</delete>
+<!--공지글 등록  -->
+<insert id="register">
+insert into notice (title, content, writer,filepath,filename)
+values (#{title},#{content},#{writer}
+,#{filepath, jdbcType=VARCHAR},#{filename, jdbcType=VARCHAR}
+</insert>
+<!-- 조회수 변경 -->
+<update id="read">
+update notice set readcnt = readcnt+1
+where id=#{id}
+</update>
+<!--공지글 정보조회  -->
+<select id="info" resultType="notice">
+select  name, n.*  
+from notice n left outer join member m on n.writer=m.user_id
+where id=#{id}
+</select>
+
+<!-- 공지목록조회 -->
+
+<select id="List" resultType="notice"><!--글에  번호 부여해주고 마지막에쓴글이 역순으로 -->
+select row_number() over(order by id) no,  name, n.*  
+from notice n left outer join member m on n.writer=m.user_id
+order by no desc
+
+<!-- select  name, n.*   -->
+<!-- from notice n left outer join member m on n.writer=m.user_id -->
+<!-- order by id -->
+</select>
+
+
+
+</mapper>
+
+
+

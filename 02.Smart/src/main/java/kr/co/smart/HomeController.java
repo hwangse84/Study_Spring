@@ -40,17 +40,19 @@ public class HomeController {
 	public String home(HttpSession session, Model model) {
 	
 	//public String home(Locale locale, Model model) {
-		
-		//테스트하는 동안 사용할 수 있도록 임시 로그인 처리
-		String user_id="hanul201", user_pw="852931fd-935c-42ff-b36c-de296f5ce703";
-		MemberVO vo= member.member_info(user_id);
-		if(pwEncoder.matches(user_pw,vo.getUser_pw())) {
-	//		session.setAttribute("loginInfo", vo);
+		//테스트하는 동안 사용할 수 있도록 임시 로그인처리 ----------------------
+//		String user_id = "hanul201", user_pw = "Hanul20100" ;
+		String user_id = "admin", user_pw = "Admin11" ;
+		MemberVO vo = member.member_info(user_id);
+		if( pwEncoder.matches(user_pw, vo.getUser_pw()) ) {
+			session.setAttribute("loginInfo", vo);
 		}
-		session.removeAttribute("category");
-		//session.removeAttribute(category,"");
-	return "home";
+		//---------------------------------------------------------
 		
+		
+		session.removeAttribute("category");
+		//session.setAttribute("category", "");
+		return "home";
 	}
 	
 }

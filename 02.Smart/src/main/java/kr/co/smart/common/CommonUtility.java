@@ -1,19 +1,99 @@
 package kr.co.smart.common;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLEncoder;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.UUID;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.mail.EmailAttachment;
 import org.apache.commons.mail.HtmlEmail;
+
 import org.springframework.stereotype.Service;
+import org.springframework.util.FileCopyUtils;
+import org.springframework.util.StringUtils;
+import org.springframework.web.multipart.MultipartFile;
 
 import kr.co.smart.member.MemberVO;
 
 @Service
 public class CommonUtility {
+	
+	
+	//파일 다운로드
+	
+	public void fileDownload(String filename,String filepath
+			             ,HttpServletRequest request,HttpServletResponse response) throws Exception{
+		//
+		//?????
+		filepath=filepath.replace(fileURL(request),"d://app/upload");
+		File file=new File(filepath);
+		
+		//파일정보로부터 Mimetype을 알아내기
+		response.setContentType(request.getSession().getServletContext().getMimeType(filename));
+		filename=URLEncoder.encode(filename,"utf-8");//파일명 한글 그대로 적용할수 있게해줌
+		
+		response.setHeader("content-disposition", "attachment; filename="+filename);	
+		FileCopyUtils.copy(new FileInputStream(file), response.getOutputStream());//try catch하거나 위처럼  throws Exception해줌
+	
+	
+	}
+	
+	
+	//파일업로드
+	public String fileUpload(String category,MultipartFile file,HttpServletRequest request) {
+		//d:// app/upload/profile/2021/01/05/ags.png
+		String upload="d://app/upload/"+ category
+				          +new SimpleDateFormat("/yyyy/MM/dd").format(new Date());//"/2024/01/05/";
+		
+		File dir=new File(upload);
+		if(! dir.exists()) dir.mkdirs();
+		//업로드할 파일명을 고유id로 변경하기
+		String filename=UUID.randomUUID().toString()+"."
+				            + StringUtils.getFilenameExtension(file.getOriginalFilename());//addf2344-flkd.png
+		
+		try {
+			
+			file.transferTo(new File(upload,filename));
+		} catch (Exception e) {
+			
+		}
+		
+		
+		//DB에 저장할 형태 :저장경로+파일명
+		//물리적 저장형태              d://app/upload/profile/2024/01/05/abc.png
+		//브라우저가 찾을 수 있는 형태   http"//localhost:80/file/profile/2024/01/05/abc.png
+		return upload.replace("d://app/upload", fileURL(request))+"/"+ filename;
+	}
+	
+	//첨부되어진 물리적인 파일 삭제하기
+	public void fileDelete(String filepath,HttpServletRequest request) {
+		if(filepath !=null) {
+			// filepath = >> http://localhost:80/file/profile/2024/01/05/abc.png
+			//					 d://app/upload/profile/2024/01/05/abc.png
+			filepath=filepath.replace(fileURL(request), "d://app/upload");
+			File file=new File(filepath);
+			if(file.exists()) file.delete();
+		}
+	}
+	
+	 // 파일 서비스받을 URL
+	   public String fileURL(HttpServletRequest request) {
+	      StringBuffer url = new StringBuffer("http://");
+	      url.append( request.getServerName()).append(":");   // http://localhost:, http://127.0.0.1:
+	      url.append( request.getServerPort());            // http://localhost:80, http://127.0.0.1:8080
+	      url.append( "/file");            // http://localhost:80/samrt, http://127.0.0.1:8080/web
+	      
+	      return url.toString();
+	   }
    
    
    public String requestAPI( String apiURL, String property ) {
@@ -92,18 +172,49 @@ public class CommonUtility {
    
    
    
-   private String EMAIL = "c@naver.com"; //관리자의 이메일주소
+   private String EMAIL = "true2525@naver.com"; //관리자의 이메일주소
    
    private void connectMailServer( HtmlEmail mail ) {
       mail.setDebug(true);
       mail.setCharset("utf-8");
       
       mail.setHostName( "smtp.naver.com" );
-      mail.setAuthentication(EMAIL, "실제비밀번호"); //관리자의 이메일주소, 해당 이메일의 비번
+      mail.setAuthentication(EMAIL, "tmddms11!"); //관리자의 이메일주소, 해당 이메일의 비번
       mail.setSSLOnConnect(true); //로그인버튼 클릭
    }
    
-   
+   //회원가입 축하 메일보내기
+   public void sendWelcome(MemberVO vo,String welcomeFile) {
+	  HtmlEmail mail=new HtmlEmail();
+	  connectMailServer(mail);
+	  
+	  try {
+		  mail.setFrom(EMAIL);
+		  mail.addTo(vo.getEmail(),vo.getName());
+		  
+		  mail.setSubject("한울 스마트 IoT 융합과정 가입");
+		  
+		  StringBuffer msg=new StringBuffer();
+		  msg.append("<body>");
+		  msg.append("<h3>스마트 IoT 융합과정</h3>");
+		  msg.append("<div>가입을 축하합니다.</div>");
+		  msg.append("<div>프로젝트까지 마무리하시고 취업 성공바래요.</div>");
+		  msg.append("<div>첨부파일을 확인 후 등교하세요.</div>");
+		  msg.append("</body>");
+		  mail.setHtmlMsg(msg.toString());
+		
+		  
+		  //파일 첨부하기
+		  EmailAttachment file=new EmailAttachment();
+		  file.setPath(welcomeFile);
+		  mail.attach(file);
+		  
+		  mail.send();//메일 보내기
+		  
+	} catch (Exception e) {
+		
+	}
+   }
    // 임시 비밀번호를 이메일로 보내기
    public boolean sendPassword(MemberVO vo, String pw) {
       boolean send = true;
