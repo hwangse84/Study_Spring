@@ -18,6 +18,7 @@
 			<c:when test="${category eq 'bo'}"><c:set var="title" value="방명록: "/></c:when>
 			<c:when test="${category eq 'da'}"><c:set var="title" value="공공데이터: "/></c:when>
 			<c:when test="${category eq 'vi'}"><c:set var="title" value="시각화: "/></c:when>
+			<c:when test="${category eq 'join'}"><c:set var="title" value="회원가입: "/></c:when>
 		</c:choose>
         <title>${title}스마트 IoT 융합</title>
         <!-- Favicon-->
@@ -26,9 +27,7 @@
         <link href="<c:url value='/css/styles.css' />" rel="stylesheet" />
         <link href="<c:url value='/css/common.css' />?<%=new java.util.Date() %>" rel="stylesheet" />
         <link rel="stylesheet" href="//code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
-  		
   		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-  
   
         <script type="text/javascript" 
         		src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
@@ -61,7 +60,6 @@
                 </div>
             </div>
             <!-- Page content wrapper-->
-           
             <div id="page-content-wrapper">
                 <!-- Top navigation-->
                 <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom">
@@ -69,60 +67,53 @@
                         <button class="btn btn-primary" id="sidebarToggle">Toggle Menu</button>
                         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
                         <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                            <ul class="navbar-nav ms-auto mt-2 mt-lg-0 align-items-center" >
-               
-                <!-- 로그인하지 않은 경우 -->
+                            <ul class="navbar-nav ms-auto mt-2 mt-lg-0 align-items-center">
+                                <!-- 로그인하지 않은 경우 -->
                                 <c:if test="${empty loginInfo }">
                                 <li class="nav-item"><a class="nav-link" href="<c:url value='/member/login'/>">로그인</a></li>
                                 <li class="nav-item"><a class="nav-link" href="<c:url value='/member/join'/>">회원가입</a></li>
                                 </c:if>
                                 
+                                <!-- 로그인한 경우 -->
+                                <c:if test="${ ! empty loginInfo }">
+                                <li class="nav-item me-3">
+                                	<c:choose>
+                                		<c:when test="${empty loginInfo.profile}"><i class="font-profile fa-regular fa-user"></i></c:when>
+                                		<c:otherwise><img class="profile" src="${loginInfo.profile}"></c:otherwise>
+                                	</c:choose>
+                                </li>
                                 
-               <!--로그인한 경우  -->
-               <c:if test="${!empty loginInfo}">
-               <li class="nav-item me-3">
-               	
-               	<c:choose>
-               		<c:when test="${empty loginInfo.profile}"><i class="font-profile fa-regular fa-user"></i></c:when>
-               		<c:otherwise><img class="profile" src="${loginInfo.profile}"></c:otherwise>
-               	</c:choose>
-               
-               </li>
-              
-                <li class="nav-item dropdown">
-                       <a class="nav-link dropdown-toggle" id="navbarDropdown" href="#" role="button"
-                           data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">${loginInfo.name}</a>
-                           
-                         <div class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-                         
-                         		<c:if test="${empty loginInfo.social }">
-                                        <a class="dropdown-item" href="#!">아이디:${loginInfo.user_id }</a>
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle" id="navbarDropdown" href="#" role="button"
+                                    	 data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">${loginInfo.name }</a>
+                                    <div class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                                    	<c:if test="${empty loginInfo.social }">
+                                        <a class="dropdown-item" href="#!">아이디: ${loginInfo.user_id }</a>
                                         <a class="dropdown-item" href="#!">My Page</a>
                                         <a class="dropdown-item" href="<c:url value='/member/changePassword'/>">비밀번호변경</a>
-                              			 <div class="dropdown-divider"></div>
-                         		</c:if>
-                          
-                          <a class="dropdown-item" href=" <c:url value='/member/logout'/> ">로그아웃</a>
-                       </div>
-                  </li>
-               </c:if>
-               </ul>
+                                        <div class="dropdown-divider"></div>
+                                        </c:if>
+                                        <a class="dropdown-item" href="<c:url value='/member/logout'/>">로그아웃</a>
+                                    </div>
+                                </li>
+                                </c:if>
+                            </ul>
+                        </div>
+                    </div>
+                </nav>
+                <!-- Page content-->
+                <div class="container-fluid my-5">
+                    <tiles:insertAttribute name="container"/>
+                </div>
+                
+                <footer class="border-top py-4 text-center">
+                	<div>Copyright &copy; My Website 2023</div>
+                </footer>
             </div>
-         </div>
-      </nav>
-      <!-- Page content-->
-      <div class="container-fluid my-3 mx-3">
-         <tiles:insertAttribute name="container"/>
-      </div>
-   </div>
-
-</div>
-<footer class="border-top py-4 text-center">
-   <div>Copyright &copy; My website 2034</div>
-</footer>
-<!-- Bootstrap core JS-->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
-<!-- Core theme JS-->
-<script src="<c:url value='/'/>js/scripts.js"></script>
+        </div>
+        <!-- Bootstrap core JS-->
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+        <!-- Core theme JS-->
+        <script src="<c:url value='/'/>js/scripts.js"></script>
 </body>
 </html>

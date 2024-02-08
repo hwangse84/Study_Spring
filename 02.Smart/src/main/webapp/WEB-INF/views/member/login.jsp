@@ -6,8 +6,8 @@
 <meta charset="UTF-8">
 <title>Insert title here</title>
 <style>
-#naver { background: url("<c:url value='/img/naver.png'/>") center/contain no-repeat #03c75a; }/* 가운데 반복하지않게!빈곳은 색상채움 */
-#kakao { background: url(""); }
+#naver { background: url("<c:url value='/img/naver.png'/>") center/contain no-repeat #03c75a; }
+#kakao { background: url("<c:url value='/img/kakao.png'/>") center/contain no-repeat #FEE500; }
 </style>
 </head>
 <body>
@@ -43,7 +43,7 @@
                     	<input type="button" class="form-control p-3" id="kakao">
                     </div>
                     <div class="d-flex align-items-center justify-content-between mt-4 mb-0">
-                        <a class="small" href="">회원가입</a>
+                        <a class="small" href="join">회원가입</a>
                         <a class="small" href="findPassword">비밀번호찾기</a>
                     </div>
             </div>
@@ -52,9 +52,19 @@
 </div>
 
 <script>
-$("#naver,#kakao").click(function(){
-	location= $(this).attr("id")+"Login";
+
+$(function(){
+	
+	if(${! empty fail}){
+		alert("아이디나 비밀번호가 일치하지 않습니다");
+	}
 })
+
+$("#naver, #kakao").click(function(){
+// 	console.log( $(this).attr("id") + "Login" )
+	location =  $(this).attr("id") + "Login";
+})
+	
 </script>
 
 </body>

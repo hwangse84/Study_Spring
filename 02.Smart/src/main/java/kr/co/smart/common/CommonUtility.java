@@ -8,6 +8,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.UUID;
 
@@ -17,6 +18,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.mail.EmailAttachment;
 import org.apache.commons.mail.HtmlEmail;
 
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Service;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.StringUtils;
@@ -24,141 +26,150 @@ import org.springframework.web.multipart.MultipartFile;
 
 import kr.co.smart.member.MemberVO;
 
-@Service
+@Service @PropertySource("classpath:info.properties")
 public class CommonUtility {
 	
-	
-	//파일 다운로드
-	
-	public void fileDownload(String filename,String filepath
-			             ,HttpServletRequest request,HttpServletResponse response) throws Exception{
-		//
-		//?????
-		filepath=filepath.replace(fileURL(request),"d://app/upload");
-		File file=new File(filepath);
+	//파일다운로드
+		public void fileDownload(String filename, String filepath
+								, HttpServletRequest request
+								, HttpServletResponse response) throws Exception{
+			
+			//filepath>  http://localhost:80/file/profile/2024/01/05/abc.png
+			//           d://app/upload/profile/2024/01/05/abc.png
+			filepath = filepath.replace( fileURL(request), "d://app/upload" );
+			File file = new File( filepath );
 		
-		//파일정보로부터 Mimetype을 알아내기
-		response.setContentType(request.getSession().getServletContext().getMimeType(filename));
-		filename=URLEncoder.encode(filename,"utf-8");//파일명 한글 그대로 적용할수 있게해줌
+			//파일정보로부터 Mimetype 을 알아내기
+			response.setContentType( request.getSession().getServletContext().getMimeType(filename) );
+			
+			filename = URLEncoder.encode(filename, "utf-8");
+			
+			response.setHeader("content-disposition", "attachment; filename=" + filename);
+			FileCopyUtils.copy( new FileInputStream(file),  response.getOutputStream() );
+		}
 		
-		response.setHeader("content-disposition", "attachment; filename="+filename);	
-		FileCopyUtils.copy(new FileInputStream(file), response.getOutputStream());//try catch하거나 위처럼  throws Exception해줌
-	
-	
+		
+		//다중 파일업로드
+		public ArrayList<FileVO> multipleFileUpload(String category, MultipartFile[] files
+										, HttpServletRequest request ) {
+			ArrayList<FileVO> list = null;
+			for( MultipartFile file : files ) {
+				if( file.isEmpty() ) continue;
+				if( list==null ) list = new ArrayList<FileVO>();
+				FileVO vo = new FileVO();
+				vo.setFilename( file.getOriginalFilename() );
+				vo.setFilepath( fileUpload(category, file, request) );
+				list.add(vo);
+			}
+			return list;
+		}
+		
+		
+		//단일 파일업로드
+		public String fileUpload(String category, MultipartFile file, HttpServletRequest request) {
+			// d://app/upload/profile/2024/01/05/abc.png
+			String upload = "d://app/upload/" + category 
+						+ new SimpleDateFormat("/yyyy/MM/dd/").format(new Date()); // "/2024/01/05/";
+			
+			//해당 폴더가 있는지 확인해서 폴더가 없다면 폴더 만들기
+			File dir = new File( upload );
+			if( ! dir.exists() ) dir.mkdirs();
+			
+			//업로드할 파일명을 고유ID로 변경하기
+			String filename = UUID.randomUUID().toString() + "."
+								+ StringUtils.getFilenameExtension( file.getOriginalFilename() );  //adad2344-fhlj.png
+			
+			try {
+				file.transferTo( new File(upload, filename) );
+			}catch(Exception e) {
+			}
+			
+			//DB에 저장할 형태: 저장경로+파일명
+			//물리적저장형태 		         d://app/upload/profile/2024/01/05/abc.png
+			//브라우저가찾을수있는형태 http://localhost:80/file/profile/2024/01/05/abc.png
+			
+			return upload.replace("d://app/upload", fileURL(request)) + filename;
+		}
+		
+		
+	//첨부되어진 물리적인파일 삭제하기
+	public void fileDelete(String filepath, HttpServletRequest request) {
+		if( filepath != null ) {
+			//filepath>  http://localhost:80/file/profile/2024/01/05/abc.png
+			//                     d://app/upload/profile/2024/01/05/abc.png
+			filepath = filepath.replace( fileURL(request), "d://app/upload" );
+			File file = new File( filepath );
+			if( file.exists() ) file.delete();
+		}
 	}
 	
+	// 파일서비스받을 URL
+	public String fileURL(HttpServletRequest request) {
+		StringBuffer url = new StringBuffer("http://");
+		url.append( request.getServerName() ).append(":"); 	// http://localhost:, http://127.0.0.1:
+		url.append( request.getServerPort() ); 				// http://localhost:80, http://127.0.0.1:8080
+		url.append( "/file" ); 								// http://localhost:80/file, http://127.0.0.1:8080/file
+		return url.toString();
+	}
 	
-	//파일업로드
-	public String fileUpload(String category,MultipartFile file,HttpServletRequest request) {
-		//d:// app/upload/profile/2021/01/05/ags.png
-		String upload="d://app/upload/"+ category
-				          +new SimpleDateFormat("/yyyy/MM/dd").format(new Date());//"/2024/01/05/";
-		
-		File dir=new File(upload);
-		if(! dir.exists()) dir.mkdirs();
-		//업로드할 파일명을 고유id로 변경하기
-		String filename=UUID.randomUUID().toString()+"."
-				            + StringUtils.getFilenameExtension(file.getOriginalFilename());//addf2344-flkd.png
-		
+	public String requestAPI( String apiURL, String property ) {
 		try {
+			URL url = new URL(apiURL);
+			HttpURLConnection con = (HttpURLConnection)url.openConnection();
+			con.setRequestMethod("GET");
+			con.setRequestProperty("Authorization", property);
 			
-			file.transferTo(new File(upload,filename));
+			int responseCode = con.getResponseCode();
+			BufferedReader br;
+			if (responseCode == 200) { // 정상 호출
+				br = new BufferedReader(new InputStreamReader(con.getInputStream(), "utf-8") );
+			} else {  // 에러 발생
+				br = new BufferedReader(new InputStreamReader(con.getErrorStream(), "utf-8"));
+			}
+			String inputLine;
+			StringBuilder res = new StringBuilder();
+			while ((inputLine = br.readLine()) != null) {
+				res.append(inputLine);
+			}
+			br.close();
+			if (responseCode == 200) {
+				apiURL = res.toString();
+				System.out.println(res.toString() );
+			}
 		} catch (Exception e) {
-			
-		}
-		
-		
-		//DB에 저장할 형태 :저장경로+파일명
-		//물리적 저장형태              d://app/upload/profile/2024/01/05/abc.png
-		//브라우저가 찾을 수 있는 형태   http"//localhost:80/file/profile/2024/01/05/abc.png
-		return upload.replace("d://app/upload", fileURL(request))+"/"+ filename;
+			// Exception 로깅
+		}		
+		return apiURL;
 	}
 	
-	//첨부되어진 물리적인 파일 삭제하기
-	public void fileDelete(String filepath,HttpServletRequest request) {
-		if(filepath !=null) {
-			// filepath = >> http://localhost:80/file/profile/2024/01/05/abc.png
-			//					 d://app/upload/profile/2024/01/05/abc.png
-			filepath=filepath.replace(fileURL(request), "d://app/upload");
-			File file=new File(filepath);
-			if(file.exists()) file.delete();
-		}
+	public String requestAPI( String apiURL ) {
+	    try {
+	        URL url = new URL(apiURL);
+	        HttpURLConnection con = (HttpURLConnection)url.openConnection();
+	        con.setRequestMethod("GET");
+	        int responseCode = con.getResponseCode();
+	        BufferedReader br;
+	        if (responseCode == 200) { // 정상 호출
+	          br = new BufferedReader(new InputStreamReader(con.getInputStream(), "utf-8") );
+	        } else {  // 에러 발생
+	          br = new BufferedReader(new InputStreamReader(con.getErrorStream(), "utf-8"));
+	        }
+	        String inputLine;
+	        StringBuilder res = new StringBuilder();
+	        while ((inputLine = br.readLine()) != null) {
+	          res.append(inputLine);
+	        }
+	        br.close();
+	        if (responseCode == 200) {
+	        	apiURL = res.toString();
+	           System.out.println(res.toString() );
+	        }
+	      } catch (Exception e) {
+	        // Exception 로깅
+	      }		
+		return apiURL;
 	}
 	
-	 // 파일 서비스받을 URL
-	   public String fileURL(HttpServletRequest request) {
-	      StringBuffer url = new StringBuffer("http://");
-	      url.append( request.getServerName()).append(":");   // http://localhost:, http://127.0.0.1:
-	      url.append( request.getServerPort());            // http://localhost:80, http://127.0.0.1:8080
-	      url.append( "/file");            // http://localhost:80/samrt, http://127.0.0.1:8080/web
-	      
-	      return url.toString();
-	   }
-   
-   
-   public String requestAPI( String apiURL, String property ) {
-      try {
-            URL url = new URL(apiURL);
-            HttpURLConnection con = (HttpURLConnection)url.openConnection();
-            con.setRequestMethod("GET");
-            con.setRequestProperty("Authorization", property);
-            int responseCode = con.getResponseCode();
-            BufferedReader br;
-            if (responseCode == 200) { // 정상 호출
-              br = new BufferedReader(new InputStreamReader(con.getInputStream(), "utf-8"));
-            } else {  // 에러 발생
-              br = new BufferedReader(new InputStreamReader(con.getErrorStream(), "utf-8"));
-            }
-            String inputLine;
-            StringBuilder res = new StringBuilder();
-            while ((inputLine = br.readLine()) != null) {
-              res.append(inputLine);
-            }
-            br.close();
-            if (responseCode == 200) {
-               apiURL = res.toString();
-               System.out.println(res.toString());
-            }
-          } catch (Exception e) {
-            // Exception 로깅
-          }
-      
-      return apiURL;
-   }
-   
-   
-   
-   
-   
-   
-   public String requestAPI( String apiURL ) {
-      try {
-            URL url = new URL(apiURL);
-            HttpURLConnection con = (HttpURLConnection)url.openConnection();
-            con.setRequestMethod("GET");
-            int responseCode = con.getResponseCode();
-            BufferedReader br;
-            if (responseCode == 200) { // 정상 호출
-              br = new BufferedReader(new InputStreamReader(con.getInputStream(), "utf-8"));
-            } else {  // 에러 발생
-              br = new BufferedReader(new InputStreamReader(con.getErrorStream(), "utf-8"));
-            }
-            String inputLine;
-            StringBuilder res = new StringBuilder();
-            while ((inputLine = br.readLine()) != null) {
-              res.append(inputLine);
-            }
-            br.close();
-            if (responseCode == 200) {
-               apiURL = res.toString();
-               System.out.println(res.toString());
-            }
-          } catch (Exception e) {
-            // Exception 로깅
-          }
-      
-      return apiURL;
-   }
    
    
    

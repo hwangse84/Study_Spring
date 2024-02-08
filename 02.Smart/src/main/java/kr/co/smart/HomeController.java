@@ -36,16 +36,29 @@ public class HomeController {
 	/**
 	 * Simply selects the home view to render by returning its name.
 	 */
+	
+	
+	//시각화 화면 요청
+			@RequestMapping("/visual/list")
+			public String list(HttpSession session){
+				session.setAttribute("category", "vi");
+				
+				return "visual/list";
+			}
+			
+			
 	@RequestMapping(value = "/", method = RequestMethod.GET)
 	public String home(HttpSession session, Model model) {
 	
 	//public String home(Locale locale, Model model) {
 		//테스트하는 동안 사용할 수 있도록 임시 로그인처리 ----------------------
-//		String user_id = "hanul201", user_pw = "Hanul20100" ;
-		String user_id = "admin", user_pw = "Admin11" ;
+		//String user_id = "gkgkgk", user_pw = "0000" ;
+		//String user_id = "rkrkrk", user_pw = "0000" ;
+		String user_id = "hanul202", user_pw = "0000" ;
+		//String user_id = "admin", user_pw = "Admin11" ;
 		MemberVO vo = member.member_info(user_id);
 		if( pwEncoder.matches(user_pw, vo.getUser_pw()) ) {
-			session.setAttribute("loginInfo", vo);
+			session.setAttribute("loginInfo", vo);//로그인 되어있게 처리함
 		}
 		//---------------------------------------------------------
 		

@@ -4,41 +4,41 @@
 
 var member = {
 	//태그별로 상태확인
-	tagStatus: function( tag,input ){
-		if( tag.is("[name=user_pw]") ) return this.userpw_status( tag.val() ,input);
-		else if( tag.is("[name=user_pw_ck]") ) return this.userpw_ck_status( tag.val() );
-		else if( tag.is("[name=user_id]") ) return this.userid_status( tag.val() );
-		else if(tag.is("[name=email]")) return this.email_status( tag.val() );;
-		
+	tagStatus: function( tag, input ){
+		if( tag.is("[name=user_pw]") ) 			return this.userpw_status( tag.val(), input );
+		else if( tag.is("[name=user_pw_ck]") ) 	return this.userpw_ck_status( tag.val() );
+		else if( tag.is("[name=user_id]") )		return this.userid_status( tag.val() );
+		else if( tag.is("[name=email]") ) 		return this.email_status( tag.val() );
 	},
 	
-	email_status:function(email){
-		var reg=/[a-z0-9]+@[a-z]+\.[a-z]{2,3}/g
-		if(email=="")             return this.common.empty;
-		else if(reg.test(email)) return this.email.valid;
-		else                     return this.email.invalid;   
-		
+	email_status: function( email ){
+		var reg = /^[0-9a-zA-Z]([-_\.]?[0-9a-zA-Z])*@[0-9a-zA-Z]([-_\.]?[0-9a-zA-Z])*\.[a-zA-Z]{2,3}$/i; 
+		if( email=="" )  				return this.common.empty;
+		else if( reg.test(email) )   	return this.email.valid;
+		else          					return this.email.invalid;
 	},
 	
-	email:{
-		valid:   {is:true, desc:"유효합니다"},
-		invalid: {is:false, desc:"유효하지 않습니다."}
+	email: {
+		valid: 		{ is:true,  desc: "유효합니다" },
+		invalid: 	{ is:false,  desc: "유효하지 않습니다" }
 	},
-	userid_status:function(id){
-		var reg=/[^a-z0-9]/g
-		if(id=="") return this.common.empty;
-		else if(reg.test(id)) return this.userid.invalid;
-		else if(id.length <5) return this.common.min;
-		else if(id.length >10) return this.common.max;
+	
+	userid_status: function( id ){
+		var reg = /[^a-z0-9]/g
+		if( id=="" )  return this.common.empty;
+		else if( reg.test(id) ) return this.userid.invalid;
+		else if( id.length < 5 ) return this.common.min;
+		else if( id.length > 10 ) return this.common.max;
 		else return this.userid.valid;
 	},
 	
 	userid: {
-		invalid:{is:false,desc:"영문 소문자, 숫자만 입력하세요"},
-		valid:   {is:true, desc:"중복확인하세요"},
-		usable:   {is:true, desc:"사용가능한 아이디입니다"},
-		unUsable:   {is:false, desc:"이미사용중인 아이디입니다"}
+		invalid: { is:false,  desc: "영문 소문자, 숫자만 입력하세요" },
+		valid:   { is:true,   desc: "중복확인하세요" },
+		usable:  { is:true,   desc: "사용가능한 아이디입니다" },
+		unUsable:{ is:false,  desc: "이미 사용중이 아이디입니다" },
 	},
+	
 	common: {
 		empty: { is:false,  desc:"입력하세요" },
 		min:   { is:false,  desc:"5자이상 입력하세요" },
@@ -62,22 +62,22 @@ var member = {
 	},
 	
 	showStatus: function( tag ){
-		var status = this.tagStatus( tag ,true)
+		var status = this.tagStatus( tag, true )
 		tag.closest( ".input-check" ).find(".desc")
 									 .text( tag.attr("title") + " " + status.desc )
 									 .removeClass( "text-success text-danger" )
 									 .addClass( status.is ? "text-success" : "text-danger")
 	},
 	
-	userpw_status: function( pw ,input){
-		if(input){
+	userpw_status: function( pw, input ){
+		//비번입력시 비번확인 초기화하기
+		if( input ){
 			$("[name=user_pw_ck]").val("");
-			$("[name=user_pw_ck]").closest(".input-check").find(".desc")
-			                       .removeClass( "text-success text-danger" )
-			                       .text(" ");
-			;
-			
+			$("[name=user_pw_ck]").closest( ".input-check" ).find(".desc")
+								  .removeClass( "text-success text-danger" )
+								  .text("");
 		}
+		
 		var upper = /[A-Z]/g, lower = /[a-z]/g, digit = /[0-9]/g, reg = /[^A-Za-z0-9]/g; 
 		if( pw == "" ) return this.common.empty;
 		else if( pw.match(this.space) ) return this.common.space;
@@ -90,6 +90,3 @@ var member = {
 	
 	
 } 
-
-
-
