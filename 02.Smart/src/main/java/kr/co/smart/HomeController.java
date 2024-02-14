@@ -4,6 +4,7 @@ import java.text.DateFormat;
 import java.util.Date;
 import java.util.Locale;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
 import org.slf4j.Logger;
@@ -29,6 +30,22 @@ public class HomeController {
 	//org.apache.commons.dbcp2.BasicDataSource" 
 	@Autowired private MemberService member;
 	@Autowired private BCryptPasswordEncoder pwEncoder;
+	
+	//오류발생시 화면연결
+	@RequestMapping("/error")
+	public String error(HttpServletRequest request,Model model) {
+		
+		//오류내용을 화면에 출력할 수 있도록  Model에 담기
+		int code = (Integer)request.getAttribute("javax.servlet.error.status_code");
+		if(code==500) {
+			Throwable exception = (Throwable)request.getAttribute("javax.servlet.error.exception");
+			model.addAttribute("error",exception.toString());
+		}
+		
+		return "default/error/" + (code == 404? 404 : "common");
+	}
+	
+	
 	
 	//org.apache.commons.dbcp2.BasicDataSource-config에서 사용
 	//org.mybatis.spring.SqlSessionFactoryBean
