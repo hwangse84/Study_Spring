@@ -71,12 +71,12 @@ public class HomeController {
 		//테스트하는 동안 사용할 수 있도록 임시 로그인처리 ----------------------
 		//String user_id = "gkgkgk", user_pw = "0000" ;
 		//String user_id = "rkrkrk", user_pw = "0000" ;
-		String user_id = "hanul202", user_pw = "0000" ;
-		//String user_id = "admin", user_pw = "Admin11" ;
-		MemberVO vo = member.member_info(user_id);
-		if( pwEncoder.matches(user_pw, vo.getUser_pw()) ) {
-			session.setAttribute("loginInfo", vo);//로그인 되어있게 처리함
-		}
+//		String user_id = "hanul202", user_pw = "0000" ;
+//		//String user_id = "admin", user_pw = "Admin11" ;
+//		MemberVO vo = member.member_info(user_id);
+//		if( pwEncoder.matches(user_pw, vo.getUser_pw()) ) {
+//			session.setAttribute("loginInfo", vo);//로그인 되어있게 처리함
+//		}
 		//---------------------------------------------------------
 		
 		
